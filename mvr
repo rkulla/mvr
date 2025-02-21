@@ -1,0 +1,71 @@
+#!/bin/bash
+# # Usage: mvr <file1> [file2 ...] | mvr
+# Description: Move one or more files to a temporary directory or restore them to their original locations
+#   $ mvr foo/file.txt bar/file2.txt  # Moves multiple files to a temporary directory and records their original paths
+#   $ mvr # Without args, restores all moved files to their original locations
+# Author: Ryan Kulla
+
+
+# Define the temporary directory and state file
+TMP_DIR="$HOME/tmp/mvr"
+STATE_FILE="$TMP_DIR/mvr.txt"
+
+# Create the temporary directory if it doesn't exist
+mkdir -p "$TMP_DIR"
+
+# Function to move files to the temporary directory
+move_files() {
+    local FILE_PATH ABS_PATH FILE_NAME
+    for FILE_PATH in "$@"; do
+        ABS_PATH="$(realpath "$FILE_PATH")"
+        FILE_NAME="$(basename "$FILE_PATH")"
+
+        # Check if the file exists
+        if [[ ! -f "$ABS_PATH" ]]; then
+            echo "Error: File '$FILE_PATH' does not exist."
+            continue
+        fi
+
+        # Move the file to the temporary directory
+        mv "$ABS_PATH" "$TMP_DIR/"
+        echo "$ABS_PATH" >> "$STATE_FILE"
+        echo "Moved '$FILE_NAME' to '$TMP_DIR'"
+    done
+    echo "Run mvr without args, to restore files back to their previous location"
+}
+
+# Function to restore files to their original locations
+restore_files() {
+    # Check if the state file exists
+    if [[ ! -f "$STATE_FILE" ]]; then
+        echo "Error: No files to restore."
+        exit 1
+    fi
+
+    # Read each saved file path and restore them
+    while IFS= read -r ORIG_PATH; do
+        FILE_NAME="$(basename "$ORIG_PATH")"
+
+        # Check if the file exists in the temporary directory
+        if [[ ! -f "$TMP_DIR/$FILE_NAME" ]]; then
+            echo "Error: The file '$FILE_NAME' is missing from '$TMP_DIR'."
+            continue
+        fi
+
+        # Create the original directory if it doesn't exist
+        mkdir -p "$(dirname "$ORIG_PATH")"
+        # Move the file back to its original location
+        mv "$TMP_DIR/$FILE_NAME" "$ORIG_PATH"
+        echo "Restored '$FILE_NAME' to '$ORIG_PATH'"
+    done < "$STATE_FILE"
+
+    # Remove the state file after restoring all files
+    rm -f "$STATE_FILE"
+}
+
+# Main script logic
+if [[ $# -gt 0 ]]; then
+    move_files "$@"
+else
+    restore_files
+fi
