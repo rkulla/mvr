@@ -1,11 +1,11 @@
 # mvr
 
 ## Description
-`mvr` is a Bash script that allows you to move one or more files to its default temporary directory or to a specified destination and later restore them to their original locations. This is useful for temporarily removing files without permanently deleting them.
+`mvr` is a command that allows you to move one or more files to its default temporary directory or to a specified destination and later restore them to their original locations. This is useful for temporarily removing files without permanently deleting them.
 
 Think of the `mv` command if it also had the option to restore (mvr is meant to mean 'mv with restore').
 
-The script works by moving files from their original locations to either a default directory (`$HOME/tmp/mvr`) or a specified destination (If last argument is a directory, it treats it as the destination). It records the original file paths in a state file (`$HOME/tmp/mvr/mvr.txt`), and when run without arguments, it restores the files back to their original locations.
+It works by moving files from their original locations to either a default directory (`$HOME/tmp/mvr`) or a specified destination (If last argument is a directory, it treats it as the destination). It records the original file paths in a state file (`$HOME/tmp/mvr/mvr.txt`), and when run without arguments, it restores the files back to their original locations.
 
 ## Usage
 
